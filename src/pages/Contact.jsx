@@ -3,11 +3,16 @@ import { Mail, Phone, MapPin, Github, Send, MessageSquare, Linkedin } from 'luci
 import { useTheme } from '../contexts/ThemeContext';
 import Footer from '../components/Footer';
 import ReactLogo from '../components/ReactLogo';
+import emailjs from '@emailjs/browser';
+
+// Initialize EmailJS
+emailjs.init("YOUR_PUBLIC_KEY"); // Replace with your actual public key
 
 const Contact = () => {
   const { isDark } = useTheme();
   const canvasRef = useRef(null);
   const logoRef = useRef(null);
+  const formRef = useRef(null);
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -17,6 +22,7 @@ const Contact = () => {
   });
 
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -64,12 +70,24 @@ const Contact = () => {
     }
   ];
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsSubmitted(true);
+    setIsLoading(true);
 
-    setTimeout(() => {
-      setIsSubmitted(false);
+    try {
+      await emailjs.send(
+        'YOUR_SERVICE_ID', // Replace with your EmailJS service ID
+        'YOUR_TEMPLATE_ID', // Replace with your EmailJS template ID
+        {
+          to_email: 'mohamedabdrabou840@gmail.com',
+          from_name: `${formData.firstName} ${formData.lastName}`,
+          from_email: formData.email,
+          report_type: formData.reportType,
+          message: formData.description
+        }
+      );
+
+      // Clear the form
       setFormData({
         firstName: '',
         lastName: '',
@@ -77,7 +95,20 @@ const Contact = () => {
         reportType: 'general',
         description: ''
       });
-    }, 3000);
+
+      // Show success message
+      setIsSubmitted(true);
+
+      // Hide success message after 3 seconds
+      setTimeout(() => {
+        setIsSubmitted(false);
+      }, 3000);
+    } catch (error) {
+      console.error('Error sending email:', error);
+      alert('Failed to send message. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -118,7 +149,7 @@ const Contact = () => {
           </div>
 
           {/* Contact Form */}
-          <form onSubmit={handleSubmit} className="max-w-2xl mx-auto space-y-6">
+          <form onSubmit={handleSubmit} ref={form} className="max-w-2xl mx-auto space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className={`block text-sm font-medium mb-2 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
@@ -126,6 +157,7 @@ const Contact = () => {
                 </label>
                 <input
                   type="text"
+                  name="firstName"
                   value={formData.firstName}
                   onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
                   className={`w-full px-4 py-2 rounded-md ${isDark
@@ -141,6 +173,7 @@ const Contact = () => {
                 </label>
                 <input
                   type="text"
+                  name="lastName"
                   value={formData.lastName}
                   onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
                   className={`w-full px-4 py-2 rounded-md ${isDark
@@ -158,6 +191,7 @@ const Contact = () => {
               </label>
               <input
                 type="email"
+                name="email"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 className={`w-full px-4 py-2 rounded-md ${isDark
@@ -173,6 +207,7 @@ const Contact = () => {
                 Type of Inquiry
               </label>
               <select
+                name="reportType"
                 value={formData.reportType}
                 onChange={(e) => setFormData({ ...formData, reportType: e.target.value })}
                 className={`w-full px-4 py-2 rounded-md ${isDark
@@ -192,6 +227,7 @@ const Contact = () => {
                 Message
               </label>
               <textarea
+                name="description"
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 rows={4}
@@ -206,20 +242,31 @@ const Contact = () => {
             <div>
               <button
                 type="submit"
+                disabled={isLoading}
                 className={`w-full flex items-center justify-center space-x-2 px-4 py-2 rounded-md ${isDark ? 'bg-blue-600 hover:bg-blue-700' : 'bg-blue-500 hover:bg-blue-600'
+                  } ${isLoading ? 'opacity-70 cursor-not-allowed' : ''
                   } text-white transition-colors duration-300`}
               >
-                <Send size={20} />
-                <span>Send Message</span>
+                {isLoading ? (
+                  <>
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                    <span>Sending...</span>
+                  </>
+                ) : (
+                  <>
+                    <Send size={20} />
+                    <span>Send Message</span>
+                  </>
+                )}
               </button>
             </div>
-          </form>
 
-          {isSubmitted && (
-            <div className="mt-6 p-4 bg-green-100 text-green-700 rounded-md text-center">
-              Thank you for your message! We'll get back to you soon.
-            </div>
-          )}
+            {isSubmitted && (
+              <div className="mt-6 p-4 bg-green-100 text-green-700 rounded-md text-center">
+                Thank you for your message! We'll get back to you soon.
+              </div>
+            )}
+          </form>
         </div>
       </div>
       <Footer />

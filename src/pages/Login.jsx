@@ -36,7 +36,7 @@ const Login = () => {
 
   useEffect(() => {
     if (isAuthenticated) {
-      navigate('/profile');
+      navigate('/');
     }
   }, [isAuthenticated, navigate]);
 
@@ -93,7 +93,7 @@ const Login = () => {
         } else {
           await register(formData);
         }
-        navigate('/profile');
+        navigate('/');
       } catch (error) {
         setErrors({ auth: error.message });
       } finally {
@@ -108,7 +108,7 @@ const Login = () => {
     setIsLoading(true);
     try {
       await googleSignIn();
-      navigate('/profile');
+      navigate('/');
     } catch (error) {
       setErrors({ auth: 'Failed to sign in with Google. Please try again.' });
     } finally {
