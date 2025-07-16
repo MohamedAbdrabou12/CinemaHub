@@ -26,7 +26,7 @@ const Login = () => {
   });
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
-  const { login, register, isAuthenticated } = useAuth();
+  const { login, register, googleSignIn, isAuthenticated } = useAuth();
   const { isDark } = useTheme();
   const navigate = useNavigate();
 

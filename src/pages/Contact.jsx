@@ -5,8 +5,11 @@ import Footer from '../components/Footer';
 import ReactLogo from '../components/ReactLogo';
 import emailjs from '@emailjs/browser';
 
-// Initialize EmailJS
-emailjs.init("YOUR_PUBLIC_KEY"); // Replace with your actual public key
+const PUBLIC_KEY = 'qcr8mR43ui_C0FJRU';
+const SERVICE_ID = 'service_j5sjfor';
+const TEMPLATE_ID = 'template_ej8qwbn';
+
+emailjs.init(PUBLIC_KEY);
 
 const Contact = () => {
   const { isDark } = useTheme();
@@ -75,34 +78,39 @@ const Contact = () => {
     setIsLoading(true);
 
     try {
-      await emailjs.send(
-        'YOUR_SERVICE_ID', // Replace with your EmailJS service ID
-        'YOUR_TEMPLATE_ID', // Replace with your EmailJS template ID
-        {
-          to_email: 'mohamedabdrabou840@gmail.com',
-          from_name: `${formData.firstName} ${formData.lastName}`,
-          from_email: formData.email,
-          report_type: formData.reportType,
-          message: formData.description
-        }
+      const templateParams = {
+        to_name: 'CinemaHub Team',
+        from_name: `${formData.firstName} ${formData.lastName}`,
+        from_email: formData.email,
+        message: formData.description,
+        subject: formData.reportType,
+      };
+
+      const result = await emailjs.send(
+        SERVICE_ID,
+        TEMPLATE_ID,
+        templateParams,
+        PUBLIC_KEY
       );
 
-      // Clear the form
-      setFormData({
-        firstName: '',
-        lastName: '',
-        email: '',
-        reportType: 'general',
-        description: ''
-      });
+      if (result.status === 200) {
+        // Clear the form
+        setFormData({
+          firstName: '',
+          lastName: '',
+          email: '',
+          reportType: 'general',
+          description: ''
+        });
 
-      // Show success message
-      setIsSubmitted(true);
+        // Show success message
+        setIsSubmitted(true);
 
-      // Hide success message after 3 seconds
-      setTimeout(() => {
-        setIsSubmitted(false);
-      }, 3000);
+        // Hide success message after 3 seconds
+        setTimeout(() => {
+          setIsSubmitted(false);
+        }, 3000);
+      }
     } catch (error) {
       console.error('Error sending email:', error);
       alert('Failed to send message. Please try again.');
@@ -149,7 +157,7 @@ const Contact = () => {
           </div>
 
           {/* Contact Form */}
-          <form onSubmit={handleSubmit} ref={form} className="max-w-2xl mx-auto space-y-6">
+          <form onSubmit={handleSubmit} className="max-w-2xl mx-auto space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className={`block text-sm font-medium mb-2 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
