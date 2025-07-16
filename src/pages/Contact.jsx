@@ -3,24 +3,16 @@ import { Mail, Phone, MapPin, Github, Send, MessageSquare, Linkedin } from 'luci
 import { useTheme } from '../contexts/ThemeContext';
 import Footer from '../components/Footer';
 import ReactLogo from '../components/ReactLogo';
-import emailjs from '@emailjs/browser';
-
-const PUBLIC_KEY = 'qcr8mR43ui_C0FJRU';
-const SERVICE_ID = 'service_j5sjfor';
-const TEMPLATE_ID = 'template_ej8qwbn';
-
-emailjs.init(PUBLIC_KEY);
 
 const Contact = () => {
   const { isDark } = useTheme();
   const canvasRef = useRef(null);
   const logoRef = useRef(null);
-  const formRef = useRef(null);
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
     email: '',
-    reportType: 'general',
+    reportType: 'General Inquiry',
     description: ''
   });
 
@@ -73,50 +65,36 @@ const Contact = () => {
     }
   ];
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-    setIsLoading(true);
+    const subject = `${formData.reportType} from ${formData.firstName} ${formData.lastName}`;
+    const body = `
+Name: ${formData.firstName} ${formData.lastName}
+Email: ${formData.email}
+Type: ${formData.reportType}
 
-    try {
-      const templateParams = {
-        to_name: 'CinemaHub Team',
-        from_name: `${formData.firstName} ${formData.lastName}`,
-        from_email: formData.email,
-        message: formData.description,
-        subject: formData.reportType,
-      };
+Message:
+${formData.description}
+    `;
 
-      const result = await emailjs.send(
-        SERVICE_ID,
-        TEMPLATE_ID,
-        templateParams,
-        PUBLIC_KEY
-      );
+    window.location.href = `mailto:mohamedabdrabou840@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 
-      if (result.status === 200) {
-        // Clear the form
-        setFormData({
-          firstName: '',
-          lastName: '',
-          email: '',
-          reportType: 'general',
-          description: ''
-        });
+    // Clear the form
+    setFormData({
+      firstName: '',
+      lastName: '',
+      email: '',
+      reportType: 'General Inquiry',
+      description: ''
+    });
 
-        // Show success message
-        setIsSubmitted(true);
+    // Show success message
+    setIsSubmitted(true);
 
-        // Hide success message after 3 seconds
-        setTimeout(() => {
-          setIsSubmitted(false);
-        }, 3000);
-      }
-    } catch (error) {
-      console.error('Error sending email:', error);
-      alert('Failed to send message. Please try again.');
-    } finally {
-      setIsLoading(false);
-    }
+    // Hide success message after 3 seconds
+    setTimeout(() => {
+      setIsSubmitted(false);
+    }, 3000);
   };
 
   return (
@@ -165,7 +143,7 @@ const Contact = () => {
                 </label>
                 <input
                   type="text"
-                  name="firstName"
+                  name="user_name"
                   value={formData.firstName}
                   onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
                   className={`w-full px-4 py-2 rounded-md ${isDark
@@ -198,8 +176,7 @@ const Contact = () => {
                 Email
               </label>
               <input
-                type="email"
-                name="email"
+                type="email" name="user_email"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 className={`w-full px-4 py-2 rounded-md ${isDark
@@ -235,7 +212,7 @@ const Contact = () => {
                 Message
               </label>
               <textarea
-                name="description"
+                name="message"
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 rows={4}
